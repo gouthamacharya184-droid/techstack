@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+.pnp
+.pnp.js
+
+# Python
+__pycache__/
+backend/app/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# SQLite & Databases
+*.db
+*.sqlite3
+backend/birthday_app.db
+
+# Build outputs
+dist/
+frontend/dist/
+build/
+*.egg-info/
+
+# Logs & Environment variables
+*.log
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Heavy local raw video archives (>100MB exceeds GitHub push limit)
+*.zip
+VIDEO SONG/
+/1-4.mp4
+/PROMPT_—_SCENE_BECOMIN.mp4
+/Jothe Jotheyali Song*.mp4
+*Dhanyaa.mp4
+backend/uploads/*.mp4
+frontend/public/media/*Dhanyaa.mp4
