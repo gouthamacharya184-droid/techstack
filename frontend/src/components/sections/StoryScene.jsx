@@ -123,28 +123,7 @@ export const StoryScene = ({
                     style={{ filter: photo?.filter_style || 'none' }}
                     loading="lazy"
                   />
-                  <div className="photo-frame-overlay">
-                    <button
-                      type="button"
-                      className="frame-act-btn view-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onOpenModal(effectiveImageUrl, currentCaption, slotId);
-                      }}
-                    >
-                      🔍 View
-                    </button>
-                    <button
-                      type="button"
-                      className="frame-act-btn change-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        fileInputRef.current?.click();
-                      }}
-                    >
-                      📷 Change Photo
-                    </button>
-                  </div>
+
                 </>
               ) : (
                 <div className="frame-placeholder">

@@ -8,9 +8,12 @@ from app.database import engine, Base, SessionLocal
 from app.crud import init_db_seeds
 from app.api.endpoints import router as api_router
 
-# Define uploads directory in the backend root
+# Define uploads directory in the backend root, or /tmp for serverless Vercel
 BASE_DIR = Path(__file__).resolve().parent.parent
-UPLOAD_DIR = BASE_DIR / "uploads"
+if os.getenv("VERCEL"):
+    UPLOAD_DIR = Path("/tmp/uploads")
+else:
+    UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -34,13 +37,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS configuration
+# CORS configuration — allow_origins="*" is valid only without allow_credentials
+# If deploying, set ALLOWED_ORIGINS env var to your specific frontend URL
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Accept", "Authorization"],
 )
 
 # Mount static files directory for stored images

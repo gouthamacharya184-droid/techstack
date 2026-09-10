@@ -20,9 +20,10 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
   const [showControls, setShowControls] = useState(true);
   const controlsTimeoutRef = useRef(null);
 
-  // Video URL pointing to Vite public media directory
-  const videoSrc = '/media/Dhanyaa.mp4';
-  const fallbackVideoSrc = '/media/Dhanyaa.mp4';
+  // Video URL pointing to uploaded video song with fallbacks
+  const videoSrc = content.video_url || '/uploads/InShot_20260906_183316810.mp4';
+  const fallbackVideoSrc = '/media/InShot_20260906_183316810.mp4';
+  const secondaryFallbackSrc = '/media/Dhanyaa.mp4';
 
   const formatTime = (seconds) => {
     if (isNaN(seconds) || seconds < 0) return '0:00';
@@ -217,6 +218,7 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
             >
               <source src={videoSrc} type="video/mp4" />
               <source src={fallbackVideoSrc} type="video/mp4" />
+              <source src={secondaryFallbackSrc} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
 

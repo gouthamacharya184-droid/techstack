@@ -1,0 +1,11 @@
+{
+  "name": "dhanya-cinematic-birthday",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Happy Birthday — A Cinematic Web Experience",
+  "scripts": {
+    "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "dev": "npm --prefix frontend run dev",
+    "preview": "npm --prefix frontend run preview"
+  }
+}

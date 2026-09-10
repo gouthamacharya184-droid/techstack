@@ -2,7 +2,12 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./birthday_app.db")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    if os.getenv("VERCEL"):
+        DATABASE_URL = "sqlite:////tmp/birthday_app.db"
+    else:
+        DATABASE_URL = "sqlite:///./birthday_app.db"
 
 # Handle SQLite vs PostgreSQL arguments
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}

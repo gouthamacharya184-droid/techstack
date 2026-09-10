@@ -212,10 +212,7 @@ export const PolaroidWall = ({ photos = {}, onUploadPhoto, onTriggerAchievement 
                   aria-label={photoUrl ? 'Change photo' : 'Add photo'}
                 >
                   {photoUrl ? (
-                    <>
-                      <img src={photoUrl} alt={p.caption} loading="lazy" />
-                      <span className="polaroid-change-pill">📷 Change Photo</span>
-                    </>
+                    <img src={photoUrl} alt={p.caption} loading="lazy" />
                   ) : (
                     <>
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true">

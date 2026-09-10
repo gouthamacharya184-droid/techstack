@@ -13,7 +13,6 @@ export const ThemeProvider = ({ children }) => {
   const [currentTheme, setCurrentTheme] = useState('gold');
   const [auroraOn, setAuroraOn] = useState(false);
   const [cineOn, setCineOn] = useState(false);
-  const [dirOn, setDirOn] = useState(false);
   const [endCreditsOn, setEndCreditsOn] = useState(false);
   const [introFinished, setIntroFinished] = useState(false);
 
@@ -31,11 +30,6 @@ export const ThemeProvider = ({ children }) => {
     document.body.classList.toggle('cine-on', cineOn);
   }, [cineOn]);
 
-  // Apply director mode class to body
-  useEffect(() => {
-    document.body.classList.toggle('dir-on', dirOn);
-  }, [dirOn]);
-
   const toggleTheme = (themeName) => {
     if (THEMES[themeName]) {
       setCurrentTheme(themeName);
@@ -44,7 +38,6 @@ export const ThemeProvider = ({ children }) => {
 
   const toggleAurora = () => setAuroraOn((prev) => !prev);
   const toggleCine = () => setCineOn((prev) => !prev);
-  const toggleDir = () => setDirOn((prev) => !prev);
   const showEndCredits = () => setEndCreditsOn(true);
   const hideEndCredits = () => setEndCreditsOn(false);
 
@@ -57,8 +50,6 @@ export const ThemeProvider = ({ children }) => {
         toggleAurora,
         cineOn,
         toggleCine,
-        dirOn,
-        toggleDir,
         endCreditsOn,
         showEndCredits,
         hideEndCredits,

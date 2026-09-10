@@ -30,10 +30,8 @@ import MemoryCarousel3D from './components/sections/MemoryCarousel3D';
 import FlipCardsGrid from './components/sections/FlipCardsGrid';
 import TimelineSection from './components/sections/TimelineSection';
 import PolaroidWall from './components/sections/PolaroidWall';
-import PhotoGallery from './components/sections/PhotoGallery';
-import CakeSection from './components/sections/CakeSection';
-import GiftBoxSection from './components/sections/GiftBoxSection';
-import WishWallSection from './components/sections/WishWallSection';
+
+
 import CinematicVideoSection from './components/sections/CinematicVideoSection';
 import ShareCardSection from './components/sections/ShareCardSection';
 import FinaleSection from './components/sections/FinaleSection';
@@ -53,8 +51,11 @@ const AppContent = () => {
   const [modalData, setModalData] = useState({ isOpen: false, src: '', caption: '', slotId: null });
   const [confettiPieces, setConfettiPieces] = useState([]);
 
+
   // Scroll reveal observer
   useIntersectionRev([mainReady, introFinished]);
+
+
 
   // Load photos from backend
   useEffect(() => {
@@ -166,6 +167,8 @@ const AppContent = () => {
       <AmbientParticles />
       <AchievementToast achievements={achievements} />
 
+
+
       {/* Retro Film Leader Countdown */}
       {inCountdown && (
         <FilmCountdown
@@ -176,8 +179,6 @@ const AppContent = () => {
 
       {/* Cinematic Intro Sequencer */}
       {inIntro && <IntroSequencer onEnterSite={handleEnterSite} />}
-
-
 
       {/* Confetti Elements */}
       {confettiPieces.map((c) => (
@@ -273,28 +274,9 @@ const AppContent = () => {
           onTriggerAchievement={triggerAchievement}
         />
 
-        {/* Photo Gallery with Filters */}
-        <PhotoGallery
-          photos={photos}
-          onUploadPhoto={handlePhotoUpload}
-          onOpenModal={openModal}
-          onTriggerAchievement={triggerAchievement}
-        />
 
-        {/* Birthday Cake with Candles */}
-        <CakeSection
-          onTriggerConfetti={launchConfetti}
-          onTriggerAchievement={triggerAchievement}
-        />
 
-        {/* Surprise Gift Box */}
-        <GiftBoxSection
-          onTriggerConfetti={launchConfetti}
-          onTriggerAchievement={triggerAchievement}
-        />
 
-        {/* Floating Wish Wall */}
-        <WishWallSection onTriggerAchievement={triggerAchievement} />
 
         {/* Cinematic Video Spotlight */}
         <CinematicVideoSection onTriggerAchievement={triggerAchievement} />

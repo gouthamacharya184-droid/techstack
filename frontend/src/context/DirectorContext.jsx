@@ -29,9 +29,12 @@ const DEFAULT_CONTENT = {
   timeline_3_title: 'Epic Journeys & Memories',
   timeline_3_desc: 'Exploring, capturing memories, taking thousands of pictures, and laughing till our stomachs hurt.',
   timeline_4_title: 'True Pillar of Support',
-  timeline_4_desc: 'Always having each other\'s back through thick and thin with unconditional warmth.',
+  timeline_4_desc: "Always having each other's back through thick and thin with unconditional warmth.",
   timeline_5_title: 'Today & Forever After',
   timeline_5_desc: 'Wishing Dhanya the happiest birthday, abundant blessings, and a year full of dreams coming true!',
+  video_title: 'A Cinematic Premiere for Dhanya',
+  video_subtitle: 'Every frame a cherished treasure, every moment unforgettable',
+  video_url: '/uploads/InShot_20260906_183316810.mp4',
   interlude_2_quote: '"May your life be filled with everlasting melodies and joy."',
   interlude_2_attr: '— Always with you, today and forever',
   finale_script: 'Happy Birthday to the most amazing, radiant Dhanya!\nThank you for every smile, every memory,\nand every golden moment you bring into our lives.',
@@ -41,6 +44,7 @@ const DEFAULT_CONTENT = {
   credits_director: 'Crafted with Love for Dhanya',
   secret_letter_head: 'Dearest Dhanya,',
   secret_letter_sign: '— Forever your best friend & biggest cheerleader ✨',
+  secret_letter_body: `Today, on your birthday, I want you to know something important — something I don't say nearly enough.\n\nYou have changed my life in ways that words can barely capture. Your kindness, your laughter, your incredible spirit... they make the world a genuinely better place. Every single day.\n\nFrom the very first moment we became friends, I knew there was something extraordinary about you. And time has only confirmed what I suspected — you are one of the most beautiful souls I have ever had the privilege of knowing.\n\nSo on this special day, I want you to feel celebrated, cherished, and endlessly loved. Because you deserve every single bit of happiness the universe can offer.\n\nThank you for being exactly who you are. Happy Birthday, my dearest friend. 🌟`,
 };
 
 const DirectorContext = createContext(null);

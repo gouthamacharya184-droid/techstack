@@ -44,10 +44,11 @@ Thumbs.db
 
 # Heavy local raw video archives (>100MB exceeds GitHub push limit)
 *.zip
+*.mp4
+*.mov
+*.m4v
 VIDEO SONG/
-/1-4.mp4
-/PROMPT_—_SCENE_BECOMIN.mp4
-/Jothe Jotheyali Song*.mp4
-*Dhanyaa.mp4
-backend/uploads/*.mp4
-frontend/public/media/*Dhanyaa.mp4
+backend/uploads/*
+!backend/uploads/.gitkeep
+frontend/public/media/*
+
