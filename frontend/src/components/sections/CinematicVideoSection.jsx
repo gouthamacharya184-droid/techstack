@@ -16,14 +16,17 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isTheater, setIsTheater] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-  const [duration, setDuration] = useState(0);
+  // Default to known video length (222s = 3:42) so mobile never displays 0:00 / 0:00
+  const [duration, setDuration] = useState(222);
   const [showControls, setShowControls] = useState(true);
   const controlsTimeoutRef = useRef(null);
 
   // Video URL pointing to uploaded video song with fallbacks
-  const videoSrc = content.video_url || '/uploads/InShot_20260906_183316810.mp4';
-  const fallbackVideoSrc = '/media/InShot_20260906_183316810.mp4';
-  const secondaryFallbackSrc = '/media/Dhanyaa.mp4';
+  // Normalize InShot video to Vite's local /media static path to avoid dev server proxy stalling
+  const rawUrl = content.video_url || '';
+  const resolvedVideoSrc = (rawUrl && !rawUrl.includes('InShot_20260906_183316810.mp4') && !rawUrl.includes('/uploads/'))
+    ? rawUrl
+    : '/media/InShot_20260906_183316810.mp4';
 
   const formatTime = (seconds) => {
     if (isNaN(seconds) || seconds < 0) return '0:00';
@@ -32,39 +35,65 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const handlePlayPause = () => {
+  const handlePlayPause = async (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     if (!videoRef.current) return;
 
     if (videoRef.current.paused) {
-      videoRef.current.play().then(() => {
-        setIsPlaying(true);
-        // If background ambient audio is currently on, pause it so video sound is clear
-        if (isBgAudioPlaying && typeof toggleBgAudio === 'function') {
+      // If background ambient audio is currently on, pause it so video sound is clear
+      if (isBgAudioPlaying && typeof toggleBgAudio === 'function') {
+        try {
           toggleBgAudio();
+        } catch (_) {}
+      }
+
+      try {
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          await playPromise;
         }
+        setIsPlaying(true);
         if (!hasStarted) {
           setHasStarted(true);
           if (onTriggerAchievement) {
             onTriggerAchievement('🎬', 'Feature Premiere', "Watching Dhanya's special cinematic video!");
           }
         }
-      }).catch((err) => {
-        console.warn('Video play interrupted:', err);
-      });
+      } catch (err) {
+        console.warn('Video play blocked or interrupted by mobile policy, retrying muted:', err);
+        // Mobile iOS Safari / Chrome restriction: allow playback if muted
+        try {
+          videoRef.current.muted = true;
+          setIsMuted(true);
+          await videoRef.current.play();
+          setIsPlaying(true);
+        } catch (retryErr) {
+          console.error('Mobile playback retry failed:', retryErr);
+        }
+      }
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
     }
   };
 
-  const handleMuteToggle = () => {
+  const handleMuteToggle = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     if (!videoRef.current) return;
     videoRef.current.muted = !videoRef.current.muted;
     setIsMuted(videoRef.current.muted);
   };
 
-  const handleFullscreenToggle = () => {
+  const handleFullscreenToggle = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     if (!videoRef.current) return;
+    
+    // iOS Safari does not support container.requestFullscreen, uses video.webkitEnterFullscreen
+    if (videoRef.current.webkitEnterFullscreen && typeof videoRef.current.webkitEnterFullscreen === 'function') {
+      videoRef.current.webkitEnterFullscreen();
+      return;
+    }
+
     const container = videoRef.current.closest('.cinema-screen-wrap');
     if (!container) return;
 
@@ -73,6 +102,8 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
         container.requestFullscreen();
       } else if (container.webkitRequestFullscreen) {
         container.webkitRequestFullscreen();
+      } else if (videoRef.current.requestFullscreen) {
+        videoRef.current.requestFullscreen();
       }
     } else {
       if (document.exitFullscreen) {
@@ -81,17 +112,18 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
     }
   };
 
-  const handleTheaterToggle = () => {
+  const handleTheaterToggle = (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     setIsTheater((prev) => !prev);
   };
 
   const handleTimeUpdate = () => {
     if (!videoRef.current) return;
     const cur = videoRef.current.currentTime;
-    const dur = videoRef.current.duration || 0;
+    const dur = videoRef.current.duration || duration || 222;
 
     if (dur > 0) {
-      const pct = (cur / dur) * 100;
+      const pct = Math.min(100, (cur / dur) * 100);
       if (progressBarRef.current) {
         progressBarRef.current.style.width = `${pct}%`;
       }
@@ -111,19 +143,25 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
 
   const handleLoadedMetadata = () => {
     if (!videoRef.current) return;
-    const dur = videoRef.current.duration || 0;
-    setDuration(dur);
-    if (timeDisplayRef.current) {
-      timeDisplayRef.current.textContent = `0:00 / ${formatTime(dur)}`;
+    const dur = videoRef.current.duration;
+    if (dur && !isNaN(dur) && dur > 0) {
+      setDuration(dur);
+      if (timeDisplayRef.current) {
+        timeDisplayRef.current.textContent = `${formatTime(videoRef.current.currentTime || 0)} / ${formatTime(dur)}`;
+      }
     }
   };
 
   const handleSeek = (e) => {
-    if (!videoRef.current || !videoRef.current.duration) return;
+    if (!videoRef.current) return;
+    const dur = videoRef.current.duration || duration || 222;
+    if (!dur) return;
+
     const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
+    const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+    const clickX = clientX - rect.left;
     const newPercent = Math.max(0, Math.min(1, clickX / rect.width));
-    const newTime = newPercent * videoRef.current.duration;
+    const newTime = newPercent * dur;
     videoRef.current.currentTime = newTime;
     if (progressBarRef.current) {
       progressBarRef.current.style.width = `${newPercent * 100}%`;
@@ -132,11 +170,11 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
       scrubberRef.current.style.left = `${newPercent * 100}%`;
     }
     if (timeDisplayRef.current) {
-      timeDisplayRef.current.textContent = `${formatTime(newTime)} / ${formatTime(videoRef.current.duration)}`;
+      timeDisplayRef.current.textContent = `${formatTime(newTime)} / ${formatTime(dur)}`;
     }
   };
 
-  const handleMouseMove = () => {
+  const triggerControlsVisibility = () => {
     setShowControls(true);
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
@@ -144,17 +182,34 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
     if (isPlaying) {
       controlsTimeoutRef.current = setTimeout(() => {
         setShowControls(false);
-      }, 2500);
+      }, 3500);
     }
   };
 
   useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid) return;
+
+    // Check if metadata already available
+    if (vid.readyState >= 1 && vid.duration && !isNaN(vid.duration) && vid.duration > 0) {
+      handleLoadedMetadata();
+    }
+
+    vid.addEventListener('loadedmetadata', handleLoadedMetadata);
+    vid.addEventListener('durationchange', handleLoadedMetadata);
+    vid.addEventListener('canplay', handleLoadedMetadata);
+    vid.addEventListener('loadeddata', handleLoadedMetadata);
+
     return () => {
+      vid.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      vid.removeEventListener('durationchange', handleLoadedMetadata);
+      vid.removeEventListener('canplay', handleLoadedMetadata);
+      vid.removeEventListener('loadeddata', handleLoadedMetadata);
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
       }
     };
-  }, []);
+  }, [resolvedVideoSrc]);
 
   return (
     <>
@@ -195,7 +250,9 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
           {/* Golden Theater Frame */}
           <div
             className="cinema-screen-wrap"
-            onMouseMove={handleMouseMove}
+            onMouseMove={triggerControlsVisibility}
+            onTouchStart={triggerControlsVisibility}
+            onClick={triggerControlsVisibility}
             onMouseLeave={() => isPlaying && setShowControls(false)}
           >
             {/* Film leader corner accents */}
@@ -207,18 +264,22 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
             {/* Video Element */}
             <video
               ref={videoRef}
+              src={resolvedVideoSrc}
               className="cinema-video-player"
               playsInline
+              webkit-playsinline="true"
+              x5-playsinline="true"
+              x5-video-player-type="h5"
               preload="metadata"
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
+              onDurationChange={handleLoadedMetadata}
+              onCanPlay={handleLoadedMetadata}
+              onLoadedData={handleLoadedMetadata}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onClick={handlePlayPause}
             >
-              <source src={videoSrc} type="video/mp4" />
-              <source src={fallbackVideoSrc} type="video/mp4" />
-              <source src={secondaryFallbackSrc} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
 
@@ -228,6 +289,7 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
                 type="button"
                 className="cinema-play-overlay"
                 onClick={handlePlayPause}
+                onTouchEnd={handlePlayPause}
                 aria-label="Play Cinematic Video"
               >
                 <div className="cinema-play-ripple" />
@@ -246,6 +308,8 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
               <div
                 className="cinema-progress-bar"
                 onClick={handleSeek}
+                onTouchStart={handleSeek}
+                onTouchMove={handleSeek}
                 role="slider"
                 aria-label="Video Progress"
                 tabIndex={0}
@@ -261,6 +325,7 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
                     type="button"
                     className="cinema-btn"
                     onClick={handlePlayPause}
+                    onTouchEnd={handlePlayPause}
                     aria-label={isPlaying ? 'Pause' : 'Play'}
                   >
                     {isPlaying ? (
@@ -278,6 +343,7 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
                     type="button"
                     className="cinema-btn"
                     onClick={handleMuteToggle}
+                    onTouchEnd={handleMuteToggle}
                     aria-label={isMuted ? 'Unmute' : 'Mute'}
                   >
                     {isMuted ? (
@@ -303,6 +369,7 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
                     type="button"
                     className={`cinema-btn ${isTheater ? 'active' : ''}`}
                     onClick={handleTheaterToggle}
+                    onTouchEnd={handleTheaterToggle}
                     title={isTheater ? 'Exit Theater Mode' : 'Theater Mode'}
                     aria-label="Toggle Theater Mode"
                   >
@@ -315,6 +382,7 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
                     type="button"
                     className="cinema-btn"
                     onClick={handleFullscreenToggle}
+                    onTouchEnd={handleFullscreenToggle}
                     title="Fullscreen"
                     aria-label="Toggle Fullscreen"
                   >

@@ -46,6 +46,37 @@ export const HeroSection = () => {
         >
           {content.hero_body}
         </p>
+        <div className="rev in" style={{ transitionDelay: '.55s', marginTop: '28px' }}>
+          <button
+            type="button"
+            className="hero-video-btn"
+            onClick={() => {
+              const el = document.getElementById('cinema-video');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+            style={{
+              background: 'linear-gradient(135deg, rgba(232, 184, 75, 0.15), rgba(201, 146, 42, 0.25))',
+              border: '1px solid rgba(232, 184, 75, 0.6)',
+              color: 'var(--gold2)',
+              padding: '10px 24px',
+              borderRadius: '30px',
+              fontSize: '0.82rem',
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              backdropFilter: 'blur(8px)',
+              boxShadow: '0 4px 20px rgba(232, 184, 75, 0.15)',
+              transition: 'all 0.3s ease',
+            }}
+          >
+            <span>🎬</span>
+            <span>Watch Premiere Video</span>
+          </button>
+        </div>
       </div>
       <div className="scroll-hint" aria-hidden="true">
         <span>Scroll to begin</span>

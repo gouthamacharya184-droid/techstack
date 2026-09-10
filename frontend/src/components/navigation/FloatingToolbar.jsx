@@ -28,6 +28,11 @@ export const FloatingToolbar = ({ visible, onAction }) => {
     if (onAction) onAction('music', !isPlaying);
   };
 
+  const scrollToVideo = () => {
+    const el = document.getElementById('cinema-video');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
   const scrollToShare = () => {
     const el = document.getElementById('share-section');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -120,6 +125,15 @@ export const FloatingToolbar = ({ visible, onAction }) => {
         >
           <span className="tb-tip" aria-hidden="true">Music</span>
           <span aria-hidden="true">🎵</span>
+        </button>
+        <button
+          className="tb-btn"
+          onClick={scrollToVideo}
+          aria-label="Scroll to Cinematic Video"
+          title="Watch Video"
+        >
+          <span className="tb-tip" aria-hidden="true">Watch Video</span>
+          <span aria-hidden="true">🎥</span>
         </button>
         <button
           className="tb-btn"

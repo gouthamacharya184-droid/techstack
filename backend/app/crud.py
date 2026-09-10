@@ -5,17 +5,23 @@ import uuid
 import base64
 from pathlib import Path
 from typing import Optional
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException, status
 from sqlalchemy.orm import Session
 from app import models, schemas
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-UPLOAD_DIR = BASE_DIR / "uploads"
+if os.getenv("VERCEL"):
+    UPLOAD_DIR = Path("/tmp/uploads")
+else:
+    UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "webp", "gif"}
+MAX_IMAGE_BYTES = 12 * 1024 * 1024  # 12 MB max
 
 
 def save_base64_image(image_data: str, prefix: str = "photo") -> str:
-    """If image_data is a base64 Data URL, decode it, save to disk in uploads/, and return the /uploads/... path."""
+    """If image_data is a base64 Data URL, decode it safely, save to disk in uploads/, and return the /uploads/... path."""
     if not image_data or not isinstance(image_data, str):
         return image_data
 
@@ -28,14 +34,21 @@ def save_base64_image(image_data: str, prefix: str = "photo") -> str:
     ext = match.group(1).lower()
     if ext == "jpeg":
         ext = "jpg"
-    elif ext == "svg+xml":
-        ext = "svg"
+
+    # Strictly whitelist raster image extensions (block SVGs / scripts)
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        return image_data
 
     b64_str = match.group(2)
     try:
         binary_data = base64.b64decode(b64_str)
     except Exception as e:
         print(f"Error decoding base64 image: {e}")
+        return image_data
+
+    # Validate size limit
+    if len(binary_data) > MAX_IMAGE_BYTES:
+        print("Base64 image exceeds 12MB limit")
         return image_data
 
     safe_prefix = re.sub(r"[^a-zA-Z0-9_\-]", "_", prefix)
@@ -79,7 +92,7 @@ DEFAULT_CONTENT = {
     "finale_script": "Happy Birthday to the most amazing, radiant Dhanya!\nThank you for every smile, every memory,\nand every golden moment you bring into our lives.",
     "video_title": "A Cinematic Premiere for Dhanya",
     "video_subtitle": "Every frame a cherished treasure, every moment unforgettable",
-    "video_url": "/uploads/InShot_20260906_183316810.mp4",
+    "video_url": "/media/InShot_20260906_183316810.mp4",
     "credits_presenter": "A Very Proud & Grateful Best Friend",
     "credits_star": "Dhanya — The Birthday Queen 👑",
     "credits_director": "Crafted with Love for Dhanya",
@@ -225,11 +238,29 @@ async def save_uploaded_photo_file(
     filter_style: Optional[str] = "none"
 ):
     ext = file.filename.split(".")[-1].lower() if file.filename and "." in file.filename else "jpg"
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported file extension: .{ext}. Allowed: {', '.join(ALLOWED_IMAGE_EXTENSIONS)}"
+        )
+
+    if file.content_type and not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid MIME type: {file.content_type}. Only image files are allowed."
+        )
+
+    contents = await file.read()
+    if len(contents) > MAX_IMAGE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File size exceeds maximum allowed limit of 12MB."
+        )
+
     safe_prefix = re.sub(r"[^a-zA-Z0-9_\-]", "_", f"photo_{slot_id}")
     filename = f"{safe_prefix}_{uuid.uuid4().hex[:10]}.{ext}"
     filepath = UPLOAD_DIR / filename
 
-    contents = await file.read()
     with open(filepath, "wb") as f:
         f.write(contents)
 

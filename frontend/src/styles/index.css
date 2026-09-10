@@ -3886,12 +3886,21 @@ input:focus-visible,
 .cinema-progress-bar {
   position: relative;
   width: 100%;
-  height: 5px;
+  height: 6px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
   cursor: pointer;
   margin-bottom: 0.8rem;
+  touch-action: none;
   transition: height 0.2s ease;
+}
+.cinema-progress-bar::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  bottom: -12px;
+  left: 0;
+  right: 0;
 }
 .cinema-progress-bar:hover {
   height: 8px;
@@ -4036,6 +4045,11 @@ input:focus-visible,
   .cinema-corner.bottom-right { bottom: 6px; right: 6px; }
   .cinema-custom-controls {
     padding: 0.8rem 0.8rem 0.5rem;
+  }
+  .cinema-progress-scrubber {
+    transform: translate(-50%, -50%) scale(1);
+    width: 12px;
+    height: 12px;
   }
   .cinema-btn {
     padding: 4px;
