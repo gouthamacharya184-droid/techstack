@@ -14,7 +14,7 @@ export const apiService = {
   getHealth: async () => {
     try {
       const res = await client.get('/health');
-      return res.data;
+      return (res.data && typeof res.data === 'object') ? res.data : { status: 'offline' };
     } catch (err) {
       console.warn('API health check fallback:', err);
       return { status: 'offline' };
@@ -25,7 +25,10 @@ export const apiService = {
   getContent: async () => {
     try {
       const res = await client.get('/content');
-      return res.data;
+      if (res.data && typeof res.data === 'object' && !Array.isArray(res.data)) {
+        return res.data;
+      }
+      return null;
     } catch (err) {
       console.warn('Failed to load remote content, using fallback:', err);
       return null;
@@ -46,7 +49,7 @@ export const apiService = {
   getWishes: async () => {
     try {
       const res = await client.get('/wishes');
-      return res.data;
+      return Array.isArray(res.data) ? res.data : [];
     } catch (err) {
       console.warn('Failed to fetch wishes:', err);
       return [];
@@ -77,7 +80,7 @@ export const apiService = {
   getPhotos: async () => {
     try {
       const res = await client.get('/photos');
-      return res.data;
+      return Array.isArray(res.data) ? res.data : [];
     } catch (err) {
       console.warn('Failed to fetch photos:', err);
       return [];
@@ -98,7 +101,7 @@ export const apiService = {
   getPins: async () => {
     try {
       const res = await client.get('/map-pins');
-      return res.data;
+      return Array.isArray(res.data) ? res.data : [];
     } catch (err) {
       console.warn('Failed to fetch map pins:', err);
       return [];
@@ -119,7 +122,7 @@ export const apiService = {
   verifySecret: async (code) => {
     try {
       const res = await client.post('/secret/verify', { code });
-      return res.data;
+      return (res.data && typeof res.data === 'object') ? res.data : { success: false, message: 'Server verification error' };
     } catch (err) {
       console.error('Failed to verify secret code:', err);
       return { success: false, message: 'Server verification error' };
@@ -130,7 +133,7 @@ export const apiService = {
   getCards: async () => {
     try {
       const res = await client.get('/cards');
-      return res.data;
+      return Array.isArray(res.data) ? res.data : [];
     } catch (err) {
       console.warn('Failed to fetch cards:', err);
       return [];

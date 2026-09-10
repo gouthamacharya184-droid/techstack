@@ -61,7 +61,7 @@ const AppContent = () => {
   useEffect(() => {
     let isMounted = true;
     apiService.getPhotos().then((data) => {
-      if (data && isMounted) {
+      if (Array.isArray(data) && isMounted) {
         const photoMap = {};
         data.forEach((p) => {
           photoMap[p.slot_id] = p;

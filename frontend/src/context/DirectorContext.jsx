@@ -60,7 +60,7 @@ export const DirectorProvider = ({ children }) => {
   useEffect(() => {
     let isMounted = true;
     apiService.getContent().then((data) => {
-      if (data && isMounted) {
+      if (data && typeof data === 'object' && !Array.isArray(data) && isMounted) {
         setContent((prev) => ({ ...prev, ...data }));
       }
     });
