@@ -30,7 +30,10 @@ import MemoryCarousel3D from './components/sections/MemoryCarousel3D';
 import FlipCardsGrid from './components/sections/FlipCardsGrid';
 import TimelineSection from './components/sections/TimelineSection';
 import PolaroidWall from './components/sections/PolaroidWall';
-
+import PhotoGallery from './components/sections/PhotoGallery';
+import CakeSection from './components/sections/CakeSection';
+import GiftBoxSection from './components/sections/GiftBoxSection';
+import WishWallSection from './components/sections/WishWallSection';
 
 import CinematicVideoSection from './components/sections/CinematicVideoSection';
 import ShareCardSection from './components/sections/ShareCardSection';
@@ -274,9 +277,28 @@ const AppContent = () => {
           onTriggerAchievement={triggerAchievement}
         />
 
+        {/* Photo Gallery with all 51 Dhanya memories */}
+        <PhotoGallery
+          photos={photos}
+          onUploadPhoto={handlePhotoUpload}
+          onOpenModal={openModal}
+          onTriggerAchievement={triggerAchievement}
+        />
 
+        {/* Birthday Cake with Candles */}
+        <CakeSection
+          onTriggerConfetti={launchConfetti}
+          onTriggerAchievement={triggerAchievement}
+        />
 
+        {/* Surprise Gift Box */}
+        <GiftBoxSection
+          onTriggerConfetti={launchConfetti}
+          onTriggerAchievement={triggerAchievement}
+        />
 
+        {/* Floating Wish Wall */}
+        <WishWallSection onTriggerAchievement={triggerAchievement} />
 
         {/* Cinematic Video Spotlight */}
         <CinematicVideoSection onTriggerAchievement={triggerAchievement} />
