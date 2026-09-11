@@ -17,7 +17,14 @@ export default defineConfig({
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,
-      }
+      },
+      // Proxy backend-hosted static assets (migrated photos, images, etc.)
+      '/media': {
+        target: 'http://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false,
+      },
     }
   }
 })
+

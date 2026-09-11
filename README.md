@@ -122,6 +122,52 @@ Frontend will be accessible at `http://localhost:5173`.
 
 ---
 
+## ⚙️ Environment Variables
+
+### Backend (`backend/.env` or deployment settings)
+| Variable | Description | Example / Default |
+| :--- | :--- | :--- |
+| `DATABASE_URL` | SQLAlchemy connection string | `sqlite:///./birthday_app.db` or `postgresql://...` |
+| `PORT` | Server listening port | `8000` |
+| `HOST` | Server host binding | `0.0.0.0` |
+| `ALLOWED_ORIGINS` | Comma-separated list of allowed CORS origins | `http://localhost:5173,https://your-domain.vercel.app` |
+| `SECRET_KEY` | Application secret key for hashing/sessions | `your-production-secret-key` |
+
+### Frontend (`frontend/.env` or deployment settings)
+| Variable | Description | Example / Default |
+| :--- | :--- | :--- |
+| `VITE_API_BASE_URL` | URL to the backend API | `/api` (local proxy) or `https://api.yourdomain.com/api` |
+
+---
+
+## 📦 Media Assets & Large Files
+
+- **Curated Photos (`backend/media/photos/`)**: 51 high-resolution curated Dhanya memory photos are tracked and served directly by the FastAPI backend under `/media/photos/*`.
+- **Uploaded Assets (`backend/uploads/`)**: User photos uploaded dynamically during runtime are saved to disk under `/uploads/*`.
+- **Cinematic Video (`backend/uploads/InShot_20260906_183316810.mp4`)**: The local cinematic video is **~374 MB**, which exceeds GitHub's 100 MB hard file limit. It is excluded from git via `.gitignore`. For production deployments:
+  - Upload the video to your cloud storage bucket (AWS S3, Cloudinary, or Supabase Storage) or your hosting server's persistent volume under `uploads/InShot_20260906_183316810.mp4`.
+  - Alternatively, specify any custom video URL via Director Mode in the live application.
+
+---
+
+## 🚀 Production Deployment
+
+### Frontend (Vercel / Netlify / Cloudflare Pages)
+- **Root Directory**: `frontend`
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Environment Variables**:
+  - Set `VITE_API_BASE_URL` to your live backend URL (e.g. `https://your-backend.onrender.com/api`).
+
+### Backend (Render / Railway / Fly.io / Docker)
+- **Root Directory**: `backend`
+- **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- **Environment Variables**:
+  - `DATABASE_URL`: Your PostgreSQL or SQLite database URL.
+  - `ALLOWED_ORIGINS`: Your live frontend URL (e.g. `https://your-frontend.vercel.app`).
+
+---
+
 ## 📂 Project Structure
 
 ```text
@@ -137,8 +183,14 @@ DHANYA/
 │   │   ├── main.py
 │   │   ├── models.py
 │   │   └── schemas.py
+│   ├── media/
+│   │   ├── images/ (295790.png)
+│   │   └── photos/ (51 curated photos)
+│   ├── uploads/
+│   │   └── .gitkeep
 │   ├── .env.example
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── vercel.json
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
@@ -151,11 +203,20 @@ DHANYA/
 │   │   ├── hooks/
 │   │   ├── services/
 │   │   ├── styles/
+│   │   ├── utils/
 │   │   ├── App.jsx
 │   │   └── main.jsx
+│   ├── public/
+│   │   └── favicon.png
+│   ├── .env.example
 │   ├── index.html
 │   ├── package.json
+│   ├── vercel.json
 │   └── vite.config.js
+├── .env.example
+├── .gitignore
 ├── birthday-movie-trailer.html (Original Reference)
-└── README.md
+├── package.json
+├── README.md
+└── vercel.json
 ```

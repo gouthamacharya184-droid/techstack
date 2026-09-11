@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDirector } from '../../context/DirectorContext';
 import { useAudio } from '../../context/AudioContext';
+import { resolveMediaUrl } from '../../utils/dhanyaPhotos';
 
 export const CinematicVideoSection = ({ onTriggerAchievement }) => {
   const { content, updateField, dirOn } = useDirector();
@@ -21,12 +22,14 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
   const [showControls, setShowControls] = useState(true);
   const controlsTimeoutRef = useRef(null);
 
-  // Video URL pointing to uploaded video song with fallbacks
-  // Normalize InShot video to Vite's local /media static path to avoid dev server proxy stalling
+  // Video URL — served from backend/uploads/ via FastAPI static mount (/uploads/*).
+  // Vite dev proxy forwards /uploads/* → http://127.0.0.1:8000/uploads/*
+  // Falls back to the known cinematic video if no custom URL is set in Director Mode.
   const rawUrl = content.video_url || '';
-  const resolvedVideoSrc = (rawUrl && !rawUrl.includes('InShot_20260906_183316810.mp4') && !rawUrl.includes('/uploads/'))
-    ? rawUrl
-    : '/media/InShot_20260906_183316810.mp4';
+  const defaultVideo = '/uploads/InShot_20260906_183316810.mp4';
+  const resolvedVideoSrc = resolveMediaUrl(
+    (rawUrl && !rawUrl.includes('InShot_20260906_183316810.mp4')) ? rawUrl : defaultVideo
+  );
 
   const formatTime = (seconds) => {
     if (isNaN(seconds) || seconds < 0) return '0:00';

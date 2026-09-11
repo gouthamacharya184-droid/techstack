@@ -9,6 +9,10 @@ if not DATABASE_URL:
     else:
         DATABASE_URL = "sqlite:///./birthday_app.db"
 
+# Convert legacy postgres:// dialect prefix to postgresql:// for SQLAlchemy 2.0+
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 # Handle SQLite vs PostgreSQL arguments
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 

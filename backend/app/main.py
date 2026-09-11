@@ -8,13 +8,23 @@ from app.database import engine, Base, SessionLocal
 from app.crud import init_db_seeds
 from app.api.endpoints import router as api_router
 
-# Define uploads directory in the backend root, or /tmp for serverless Vercel
+# Define uploads and media directories in the backend root, or /tmp for serverless Vercel uploads
 BASE_DIR = Path(__file__).resolve().parent.parent
+MEDIA_DIR = BASE_DIR / "media"
 if os.getenv("VERCEL"):
     UPLOAD_DIR = Path("/tmp/uploads")
 else:
     UPLOAD_DIR = BASE_DIR / "uploads"
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+try:
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass
+
+try:
+    MEDIA_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass
 
 
 @asynccontextmanager
@@ -37,9 +47,9 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS configuration — allow_origins="*" is valid only without allow_credentials
-# If deploying, set ALLOWED_ORIGINS env var to your specific frontend URL
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+# CORS configuration — supports both ALLOWED_ORIGINS and CORS_ORIGINS
+raw_origins = os.getenv("ALLOWED_ORIGINS") or os.getenv("CORS_ORIGINS") or "*"
+ALLOWED_ORIGINS = [orig.strip() for orig in raw_origins.split(",") if orig.strip()]
 
 app.add_middleware(
     CORSMiddleware,
@@ -48,8 +58,10 @@ app.add_middleware(
     allow_headers=["Content-Type", "Accept", "Authorization"],
 )
 
-# Mount static files directory for stored images
+# Mount static files directories for user uploads and backend media assets
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
+# Mount /media for migrated static assets: photos, images, videos served by backend
+app.mount("/media", StaticFiles(directory=str(MEDIA_DIR)), name="media")
 
 app.include_router(api_router)
 
@@ -59,7 +71,8 @@ def root():
     return {
         "message": "Happy Birthday — A Cinematic Experience API is running",
         "docs": "/docs",
-        "uploads": "/uploads"
+        "uploads": "/uploads",
+        "media": "/media"
     }
 
 

@@ -16,7 +16,11 @@ import AuroraCanvas from './components/common/AuroraCanvas';
 import AmbientParticles from './components/common/AmbientParticles';
 import AchievementToast from './components/common/AchievementToast';
 
-
+// Navigation & Interactive Controls
+import FloatingToolbar from './components/navigation/FloatingToolbar';
+import MusicPlayer from './components/navigation/MusicPlayer';
+import NowPlaying from './components/navigation/NowPlaying';
+import ThemeSwitcher from './components/navigation/ThemeSwitcher';
 
 // Intro sequence
 import FilmCountdown from './components/intro/FilmCountdown';
@@ -187,6 +191,12 @@ const AppContent = () => {
       {confettiPieces.map((c) => (
         <div key={c.id} className="cpiece" style={c.style} aria-hidden="true" />
       ))}
+
+      {/* Floating Navigation Controls */}
+      <MusicPlayer visible={mainReady} />
+      <NowPlaying visible={mainReady} />
+      <ThemeSwitcher visible={mainReady} />
+      <FloatingToolbar visible={mainReady} />
 
       {/* Main Experience */}
       <main id="main" className={mainReady ? 'show' : ''} style={{ display: mainReady ? 'block' : 'none' }}>

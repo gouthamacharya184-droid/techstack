@@ -129,4 +129,4 @@ export const useAudio = () => {
   return ctx;
 };
 
-export default AudioContextState;
+export default AudioProvider;

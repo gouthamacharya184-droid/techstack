@@ -52,3 +52,6 @@ backend/uploads/*
 !backend/uploads/.gitkeep
 frontend/public/media/*
 
+# Root loose raw photos (migrated to backend/media/photos/)
+/Snapchat-*.jpg
+
