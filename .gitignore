@@ -52,6 +52,9 @@ backend/uploads/*
 !backend/uploads/.gitkeep
 frontend/public/media/*
 
+# Allow production web-optimized faststart video (<100MB)
+!backend/media/videos/dhanya_cinematic_movie.mp4
+
 # Root loose raw photos (migrated to backend/media/photos/)
 /Snapchat-*.jpg
 

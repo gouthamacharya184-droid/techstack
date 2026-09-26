@@ -22,14 +22,14 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
   const [showControls, setShowControls] = useState(true);
   const controlsTimeoutRef = useRef(null);
 
-  // Video URL — served from backend/uploads/ via FastAPI static mount (/uploads/*).
-  // Vite dev proxy forwards /uploads/* → http://127.0.0.1:8000/uploads/*
-  // Falls back to the known cinematic video if no custom URL is set in Director Mode.
+  // Video URL — served from backend /media/videos/ with faststart streaming support.
+  // Vite dev proxy forwards /media/* → http://127.0.0.1:8000/media/*
   const rawUrl = content.video_url || '';
-  const defaultVideo = '/uploads/InShot_20260906_183316810.mp4';
-  const resolvedVideoSrc = resolveMediaUrl(
-    (rawUrl && !rawUrl.includes('InShot_20260906_183316810.mp4')) ? rawUrl : defaultVideo
-  );
+  const defaultVideo = '/media/videos/dhanya_cinematic_movie.mp4';
+  const effectiveUrl = (rawUrl && !rawUrl.includes('InShot_20260906_183316810.mp4'))
+    ? rawUrl
+    : defaultVideo;
+  const resolvedVideoSrc = resolveMediaUrl(effectiveUrl);
 
   const formatTime = (seconds) => {
     if (isNaN(seconds) || seconds < 0) return '0:00';
@@ -283,6 +283,9 @@ export const CinematicVideoSection = ({ onTriggerAchievement }) => {
               onPause={() => setIsPlaying(false)}
               onClick={handlePlayPause}
             >
+              <source src={resolvedVideoSrc} type="video/mp4" />
+              <source src="/media/videos/dhanya_cinematic_movie.mp4" type="video/mp4" />
+              <source src="/uploads/InShot_20260906_183316810.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
 

@@ -92,7 +92,7 @@ DEFAULT_CONTENT = {
     "finale_script": "Happy Birthday to the most amazing, radiant Dhanya!\nThank you for every smile, every memory,\nand every golden moment you bring into our lives.",
     "video_title": "A Cinematic Premiere for Dhanya",
     "video_subtitle": "Every frame a cherished treasure, every moment unforgettable",
-    "video_url": "/media/InShot_20260906_183316810.mp4",
+    "video_url": "/media/videos/dhanya_cinematic_movie.mp4",
     "credits_presenter": "A Very Proud & Grateful Best Friend",
     "credits_star": "Dhanya — The Birthday Queen 👑",
     "credits_director": "Crafted with Love for Dhanya",
@@ -291,7 +291,7 @@ def get_all_pins(db: Session):
 
 
 def create_pin(db: Session, pin_data: schemas.MemoryPinCreate):
-    pin = models.MemoryPin(**pin_data.dict())
+    pin = models.MemoryPin(**pin_data.model_dump())
     db.add(pin)
     db.commit()
     db.refresh(pin)
@@ -333,7 +333,7 @@ def save_share_card(db: Session, card_data: schemas.ShareCardCreate):
     if card_data.image_preview:
         saved_preview = save_base64_image(card_data.image_preview, prefix=f"card_{card_data.recipient_name[:12]}")
     
-    card_dict = card_data.dict()
+    card_dict = card_data.model_dump()
     card_dict["image_preview"] = saved_preview
     card = models.ShareCardGreeting(**card_dict)
     db.add(card)
